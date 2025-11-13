@@ -1,6 +1,5 @@
 package com.example.mcqquiz.ui
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
@@ -12,8 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.mcqquiz.Question
 import com.example.mcqquiz.UiState
 
@@ -36,17 +35,36 @@ fun QuizScreen(state: UiState, onSelect: (Int) -> Unit, onSkip: () -> Unit) {
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Streak badge
-            val lit = state.streak >= 3
-            val scale = animateFloatAsState(if (lit) 1.2f else 1f)
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .padding(4.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(text = "🔥", modifier = Modifier.scale(scale.value))
-            }
+            // Spacer to keep the timer centered
+            Spacer(modifier = Modifier.width(40.dp))
+        }
+
+        // Streak indicators
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "🔥",
+                modifier = Modifier.alpha(if (state.streak >= 3) 1f else 0.2f).padding(horizontal = 2.dp),
+                fontSize = 24.sp
+            )
+            Text(
+                text = "🔥",
+                modifier = Modifier.alpha(if (state.streak >= 4) 1f else 0.2f).padding(horizontal = 2.dp),
+                fontSize = 24.sp
+            )
+            Text(
+                text = "🔥",
+                modifier = Modifier.alpha(if (state.streak >= 5) 1f else 0.2f).padding(horizontal = 2.dp),
+                fontSize = 24.sp
+            )
+            Text(
+                text = "🔥",
+                modifier = Modifier.alpha(if (state.streak >= 6) 1f else 0.2f).padding(horizontal = 2.dp),
+                fontSize = 24.sp
+            )
         }
 
         Text(
