@@ -1,42 +1,40 @@
 package com.example.mcqquiz.ui
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mcqquiz.ui.theme.CorrectGreen
+import com.example.mcqquiz.ui.theme.IncorrectRed
+import com.example.mcqquiz.ui.theme.SelectedGray
 
 @Composable
 fun OptionRow(text: String, isSelected: Boolean, isCorrect: Boolean?, onClick: () -> Unit) {
     // if isCorrect is null => not revealed yet
     val bg = when {
-        isCorrect == null && isSelected -> Color.LightGray
-        isCorrect == true -> Color(0xFFB9F6CA) // greenish
-        isCorrect == false -> Color(0xFFFFCDD2) // reddish
-        else -> Color(0xFFF5F5F5)
+        isCorrect == true -> CorrectGreen // Correct answer is always green after reveal
+        isSelected && isCorrect == false -> IncorrectRed // Selected incorrect answer is red
+        isSelected -> SelectedGray // Selected answer before reveal
+        else -> MaterialTheme.colorScheme.primary
     }
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 6.dp)
-            .background(bg, RoundedCornerShape(8.dp))
+            .padding(vertical = 4.dp) // Reduced vertical padding
+            .background(bg, RoundedCornerShape(16.dp))
             .clickable { onClick() }
-            .padding(12.dp)
+            .padding(horizontal = 16.dp, vertical = 10.dp), // Fine-tuned padding
+        contentAlignment = Alignment.Center
     ) {
-        Text(text = text, fontSize = 16.sp)
+        Text(text = text, fontSize = 16.sp, color = MaterialTheme.colorScheme.onPrimary)
     }
 }

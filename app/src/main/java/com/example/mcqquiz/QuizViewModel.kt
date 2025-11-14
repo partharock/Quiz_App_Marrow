@@ -34,7 +34,7 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
     private var advanceJob: Job? = null
 
     companion object {
-        private const val ADVANCE_DELAY_SECONDS = 5
+        private const val ADVANCE_DELAY_SECONDS = 2
     }
 
     init {
@@ -107,7 +107,6 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
 
         advanceJob?.cancel()
         advanceJob = getAdvanceJob()
-
     }
 
     fun skip() {
@@ -120,7 +119,7 @@ class QuizViewModel(application: Application) : AndroidViewModel(application) {
             advance()
             return
         }
-        _uiState.value = s.copy(skippedAnswers = s.skippedAnswers + 1, streak = 0)
+        _uiState.value = s.copy(skippedAnswers = s.skippedAnswers + 1)
         advance()
     }
 
