@@ -1,6 +1,7 @@
 package com.example.mcqquiz
 
 import android.app.Application
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -99,6 +100,14 @@ class QuizViewModel(application: Application, private val repository: QuizReposi
             loading = false,
             questions = questions,
             totalQuestions = questions.size,
+        )
+    }
+
+    @VisibleForTesting
+    fun setQuestions(questions: List<QuizUiQuestion>) {
+        _uiState.value = _uiState.value.copy(
+            questions = questions,
+            totalQuestions = questions.size
         )
     }
 
