@@ -12,3 +12,4 @@ val CorrectGreen = Color(0xFFB9F6CA)
 val IncorrectRed = Color(0xFFFFCDD2)
 val SelectedGray = Color.LightGray
 val RestartButtonColor = Color(0xFF007AFF)
+val Orange = Color(0xFFFFA500)
