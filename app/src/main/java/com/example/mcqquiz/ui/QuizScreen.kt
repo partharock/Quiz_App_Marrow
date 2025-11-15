@@ -1,63 +1,135 @@
 package com.example.mcqquiz.ui
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.VolumeOff
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mcqquiz.Question
+import com.example.mcqquiz.QuizUiQuestion
 import com.example.mcqquiz.UiState
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun QuizScreen(state: UiState, onSelect: (Int) -> Unit, onSkip: () -> Unit) {
-    val q: Question = state.questions[state.currentIndex]
+fun QuizScreen(
+    state: UiState,
+    onSelect: (Int) -> Unit,
+    onSkip: () -> Unit,
+    onToggleSound: () -> Unit,
+    onPageChanged: (Int) -> Unit,
+    onEndTest: () -> Unit
+) {
+    val pagerState = rememberPagerState(pageCount = { state.questions.size })
+
+    LaunchedEffect(state.currentIndex) {
+        pagerState.animateScrollToPage(state.currentIndex)
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        onPageChanged(pagerState.currentPage)
+    }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "fire-animation")
+    val fireAnimationScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.2f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(700),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "fire-scale"
+    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
 
-        Text("Quiz", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.align(Alignment.CenterHorizontally))
+        Box(modifier = Modifier.fillMaxWidth()) {
+            if (state.endTestButtonVisible) {
+                TextButton(
+                    onClick = onEndTest,
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .background(Color.Magenta, shape = MaterialTheme.shapes.small)
+                ) {
+                    Text("End Test", color = Color.Cyan)
+                }
+            }
+            Text(
+                text = "Quiz",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.align(Alignment.Center)
+            )
+            IconButton(onClick = onToggleSound, modifier = Modifier.align(Alignment.CenterEnd)) {
+                Icon(
+                    imageVector = if (state.isSoundEnabled) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
+                    contentDescription = "Toggle Sound"
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(12.dp))
 
         // Streak indicators
         Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 2.dp)
+                .clearAndSetSemantics { },
+            horizontalArrangement = Arrangement.SpaceEvenly, // This will evenly space the emojis
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "🔥",
-                modifier = Modifier.alpha(if (state.streak >= 3) 1f else 0.2f).padding(horizontal = 2.dp),
-                fontSize = 24.sp
-            )
-            Text(
-                text = "🔥",
-                modifier = Modifier.alpha(if (state.streak >= 4) 1f else 0.2f).padding(horizontal = 2.dp),
-                fontSize = 24.sp
-            )
-            Text(
-                text = "🔥",
-                modifier = Modifier.alpha(if (state.streak >= 5) 1f else 0.2f).padding(horizontal = 2.dp),
-                fontSize = 24.sp
-            )
-            Text(
-                text = "🔥",
-                modifier = Modifier.alpha(if (state.streak >= 6) 1f else 0.2f).padding(horizontal = 2.dp),
-                fontSize = 24.sp
-            )
+            val fireEmojis = listOf(3, 4, 5, 6)
+            fireEmojis.forEach { streakLevel ->
+                val isActive = state.streak >= streakLevel
+                Text(
+                    text = "🔥",
+                    modifier = Modifier
+                        .alpha(if (isActive) 1f else 0.2f)
+                        .scale(if (isActive) fireAnimationScale else 1f),
+                    fontSize = 24.sp
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -77,13 +149,13 @@ fun QuizScreen(state: UiState, onSelect: (Int) -> Unit, onSkip: () -> Unit) {
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .alpha(if (state.revealed) 1f else 0f)
+                .alpha(if (state.showAdvanceTimer) 1f else 0f)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            "Question ${state.currentIndex + 1} of ${state.totalQuestions}",
+            text = "Question ${state.currentIndex + 1} of ${state.totalQuestions}",
             style = MaterialTheme.typography.bodyLarge
         )
         LinearProgressIndicator(
@@ -95,35 +167,47 @@ fun QuizScreen(state: UiState, onSelect: (Int) -> Unit, onSkip: () -> Unit) {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Box(modifier = Modifier.height(90.dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
-            Text(
-                q.question,
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.weight(1f)
+        ) { page ->
+            val quizQuestion = state.questions[page]
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Text(
+                    quizQuestion.question.question,
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                )
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        q.options.forEachIndexed { idx, opt ->
-            val isSelected = state.selectedIndex == idx
-            val isCorrect = if (!state.revealed) null else (idx == q.answerIndex)
-            OptionRow(text = opt, isSelected = isSelected, isCorrect = isCorrect) {
-                if (!state.revealed) onSelect(idx)
+                quizQuestion.question.options.forEachIndexed { idx, opt ->
+                    val isSelected = quizQuestion.selectedIndex == idx
+                    val isCorrect =
+                        if (!quizQuestion.revealed) null else (idx == quizQuestion.question.answerIndex)
+                    OptionRow(text = opt, isSelected = isSelected, isCorrect = isCorrect) {
+                        if (!quizQuestion.revealed) onSelect(idx)
+                    }
+                }
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = onSkip, modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Icon(Icons.Default.SkipNext, contentDescription = "Skip")
+            val buttonText =
+                if (state.questions.getOrNull(state.currentIndex)?.revealed == true) "Next" else "Skip"
+            Icon(Icons.Default.SkipNext, contentDescription = buttonText)
             Spacer(modifier = Modifier.width(8.dp))
-            Text(if (state.revealed) "Next" else "Skip")
+            Text(buttonText)
         }
     }
 }
