@@ -31,8 +31,14 @@ import com.example.mcqquiz.ui.StartScreen
 import com.example.mcqquiz.ui.theme.McqQuizTheme
 import kotlinx.coroutines.delay
 
+/**
+ * The main entry point of the application. This activity hosts all the composable screens.
+ */
 class MainActivity : ComponentActivity() {
 
+    /**
+     * Sets up the UI content of the activity.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -55,6 +61,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * The main content of the app. This composable function orchestrates the display of the different
+ * screens based on the current state of the quiz.
+ *
+ * @param state The current state of the UI.
+ * @param vm The ViewModel that holds the app's state and business logic.
+ * @param activity The current activity, used to finish the app.
+ */
 @Composable
 private fun MainContent(state: UiState, vm: QuizViewModel, activity: Activity?) {
     Surface(
